@@ -191,6 +191,42 @@ h6,
   }
 }
 
+/* Markdown Beautiful Typography */
+.markdown-body {
+  line-height: 1.8;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+}
+
+.markdown-body p {
+  margin-bottom: 1.5rem;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body strong {
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.5rem;
+}
+
+.quest-text p {
+  margin-bottom: 0.8rem;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 type DiagnosticStep = 'INPUT' | 'PARSING' | 'ANALYZING' | 'RESULT';
 
@@ -166,7 +167,7 @@ export default function Home() {
           <h1 className="glow-cyan" style={{ fontSize: '3rem', marginBottom: '1rem' }}>
             WILL <span className="glow-magenta" style={{ color: 'var(--neon-magenta)' }}>AI</span> REPLACE ME?
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.6' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
             <strong>Our Goal:</strong> To execute a rigorous, multi-agent AI vulnerability diagnostic on your career trajectory.
             Upload your Resume or LinkedIn Profile to identify exactly which areas of your skill tree must be targeted to achieve indispensable <em>architectural depth</em> in your domain.
           </p>
@@ -293,8 +294,8 @@ export default function Home() {
       )}
 
       {step === 'RESULT' && finalReport && (
-        <div className="fade-in" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div className="fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
             <h1 className="glow-cyan" style={{ fontSize: '2.5rem', margin: 0 }}>
               ANALYSIS_COMPLETE
             </h1>
@@ -336,46 +337,53 @@ export default function Home() {
             </section>
 
             {/* Oracle Insights */}
-            <section className="panel">
-              <h3 className="cyber-font glow-yellow" style={{ color: 'var(--neon-yellow)', fontSize: '1.2rem', marginBottom: '1rem' }}>
+            <section className="panel" style={{ padding: '2.5rem' }}>
+              <h3 className="cyber-font glow-yellow" style={{ color: 'var(--neon-yellow)', fontSize: '1.3rem', marginBottom: '1.5rem' }}>
                 ORACLE_INSIGHTS (AI_VULNERABILITY)
               </h3>
-              <p style={{ lineHeight: 1.6, color: 'var(--text-primary)' }}>
-                {finalReport.insights}
-              </p>
+              <div className="markdown-body">
+                <ReactMarkdown>
+                  {finalReport.insights}
+                </ReactMarkdown>
+              </div>
             </section>
           </div>
 
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '3rem' }}>
             {/* Mentor Roadmap */}
-            <section className="panel" style={{ marginBottom: '2rem' }}>
-              <h3 className="cyber-font glow-cyan" style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', marginBottom: '1.5rem' }}>
+            <section className="panel" style={{ marginBottom: '3rem', padding: '3rem' }}>
+              <h3 className="cyber-font glow-cyan" style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', marginBottom: '2rem' }}>
                 &gt;_ THE_CYBER_ROADMAP
               </h3>
-              <div style={{ lineHeight: 1.8, color: 'var(--text-primary)' }}>
-                {finalReport.roadmap.map((para: string, idx: number) => (
-                  <p key={idx} style={{ marginBottom: '1rem' }}>{para}</p>
-                ))}
+              <div className="markdown-body">
+                <ReactMarkdown>
+                  {Array.isArray(finalReport.roadmap) ? finalReport.roadmap.join('\n\n') : finalReport.roadmap}
+                </ReactMarkdown>
               </div>
             </section>
 
             {/* Level Up Quests */}
-            <section className="panel" style={{ borderColor: 'var(--neon-yellow)' }}>
-              <h3 className="cyber-font" style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', marginBottom: '1.5rem' }}>
+            <section className="panel" style={{ borderColor: 'var(--neon-yellow)', padding: '3rem' }}>
+              <h3 className="cyber-font" style={{ color: 'var(--neon-yellow)', fontSize: '1.6rem', marginBottom: '2rem' }}>
                 &gt;_ LEVEL_UP_QUESTS
               </h3>
               <ul style={{ listStyleType: 'none', padding: 0 }}>
                 {finalReport.quests.map((quest: string, idx: number) => (
                   <li key={idx} style={{
                     background: 'rgba(252, 238, 10, 0.05)',
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    borderLeft: '4px solid var(--neon-yellow)'
+                    padding: '2rem',
+                    marginBottom: '1.5rem',
+                    borderLeft: '4px solid var(--neon-yellow)',
+                    borderRadius: '4px'
                   }}>
-                    <span style={{ color: 'var(--neon-yellow)', fontWeight: 'bold', marginRight: '1rem' }}>
-                      [QUEST_{idx + 1}]
-                    </span>
-                    {quest}
+                    <div style={{ color: 'var(--neon-yellow)', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className="cyber-font">[QUEST_{idx + 1}]</span>
+                    </div>
+                    <div className="markdown-body quest-text">
+                      <ReactMarkdown>
+                        {quest}
+                      </ReactMarkdown>
+                    </div>
                   </li>
                 ))}
               </ul>
