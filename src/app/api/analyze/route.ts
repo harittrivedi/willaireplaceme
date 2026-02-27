@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
         const vigorScore: number = extractorResult.vigor_score || 50;
 
         // Agent 2: The Oracle (Domain Research)
-        const oracleSys = `You are a hyper-analytical AI Capability Oracle. Research current state-of-the-art AI against the user's specific sub-domain. You must be highly rigorous and objective: identify exactly which tasks they perform that are highly vulnerable to current LLMs and Agentic automation. You must provide deep technical insights into what parts of their job will be automated soon. Return strict JSON: {"research_insights": "rigorous, objective analysis of AI's threat to their specific job functions", "immunity_score": number(1-100)}`;
+        const oracleSys = `You are a hyper-analytical AI Capability Oracle. Research current state-of-the-art AI against the user's specific sub-domain. You must be highly rigorous and objective. Keep your insights EXTREMELY concise, crisp, and high-impact (under 2 minutes of reading time). Use punchy bullet points. Identify exactly which tasks they perform that are highly vulnerable to current LLMs and Agentic automation. Return strict JSON: {"research_insights": "concise, bulleted, objective analysis of AI's threat", "immunity_score": number(1-100)}`;
         const oracleUser = `User Profile: ${extractorResult.structured_profile}`;
         const oracleRes = await runAgent(oracleSys, oracleUser, 0);
         const oracleResult = JSON.parse(oracleRes || '{}');
@@ -125,8 +125,9 @@ export async function POST(req: NextRequest) {
 
         // Agent 4: The Mentor
         const mentorSys = `You are a futuristic, elite Cyber-Mentor. Based on the rigorous AI vulnerability analysis, provide a concrete, step-by-step roadmap to achieve 'System Architect' depth in their exact domain. 
-You MUST provide 3 elaborately detailed, highly specific 'Level-Up Quests'. These quests shouldn't just be 'learn python' - they must involve mastering specific modern architectures, advanced integrations, or deep foundational methodologies that AI cannot easily replicate (e.g. distributed systems consensus, hardware/software codesign, adversarial ML training).
-Return JSON: {"cyber_roadmap": ["paragraph 1", "paragraph 2"], "level_up_quests": ["complex highly detailed task 1", "complex highly detailed task 2", "complex highly detailed task 3"]}`;
+Keep the roadmap EXTREMELY concise, punchy, and fast to read. It should be rapid-fire, high-impact advice.
+You MUST provide 3 elaborately detailed, yet concisely worded 'Level-Up Quests'. These quests shouldn't just be 'learn python' - they must involve mastering specific modern architectures, advanced integrations, or deep foundational methodologies that AI cannot easily replicate (e.g. distributed systems consensus, hardware/software codesign).
+Return JSON: {"cyber_roadmap": ["short crisp paragraph 1", "short crisp paragraph 2"], "level_up_quests": ["concise, complex task 1", "concise, complex task 2", "concise, complex task 3"]}`;
         const mentorUser = `The user achieved a total Architect Convergence Score of ${roundedFinalScore}/10. Their AI Immunity is ${immunityScore}/100. Profile context: ${extractorResult.structured_profile}. Draft their cyber-roadmap and give them 3 actionable "level-up quests".`;
         const mentorRes = await runAgent(mentorSys, mentorUser, 0.2);
         const mentorResult = JSON.parse(mentorRes || '{}');

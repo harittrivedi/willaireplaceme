@@ -171,6 +171,8 @@ h6,
     border: none !important;
     color: #fff !important;
     box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   h1,
@@ -180,6 +182,13 @@ h6,
   .cyber-font {
     color: #fff !important;
     text-shadow: none !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  li {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .hide-on-print {
