@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
-import { JSDOM } from 'jsdom';
+import * as cheerio from 'cheerio';
 
 export const maxDuration = 60; // Allow 60 seconds on Vercel for sequential multi-agent calls
 
@@ -28,16 +28,14 @@ export async function POST(req: NextRequest) {
                     });
                     const html = await res.text();
 
-                    // Parse with JSDOM
-                    const dom = new JSDOM(html);
-                    const document = dom.window.document;
+                    // Parse with Cheerio (Vercel Serverless Friendly)
+                    const $ = cheerio.load(html);
 
                     // --- SECURITY: Aggressive Sanitization ---
                     // Remove all potentially malicious or noisy injection vectors
-                    const dangerousElements = document.querySelectorAll('script, style, noscript, iframe, object, embed, form, input, button');
-                    dangerousElements.forEach(el => el.remove());
+                    $('script, style, noscript, iframe, object, embed, form, input, button').remove();
 
-                    let scrapedText = document.body.textContent?.replace(/\s+/g, ' ').trim() || '';
+                    let scrapedText = $('body').text().replace(/\s+/g, ' ').trim() || '';
 
                     // --- SECURITY: Payload Truncation ---
                     // Prevent memory-exhaustion or prompt-injection attacks via massive hidden text walls
