@@ -123,7 +123,7 @@ export default function Home() {
 
       clearInterval(interval);
 
-      if (!analyzeRes.ok) throw new Error(analyzeData.error || 'Analysis failed.');
+      if (!analyzeRes.ok) throw new Error(`${analyzeData.error} | ${analyzeData.details || ''}`);
 
       addLog('[SUCCESS] ANALYSIS COMPLETE. SCALING SCORES...');
 
@@ -304,7 +304,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
 
             {/* Score Card */}
             <section className="panel" style={{ textAlign: 'center', borderColor: 'var(--neon-magenta)' }}>
@@ -316,29 +316,29 @@ export default function Home() {
                 <span style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>/10</span>
               </div>
 
-              <div style={{ marginTop: '2rem', textAlign: 'left', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
                 <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>AI IMMUNITY</div>
-                  <div style={{ color: 'var(--neon-yellow)', fontSize: '1.2rem' }}>{finalReport.baseScores.immunity}%</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>AI IMMUNITY</div>
+                  <div style={{ color: 'var(--neon-yellow)', fontSize: '1.6rem' }}>{finalReport.baseScores.immunity}%</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>PROFILE VIGOR</div>
-                  <div style={{ color: 'var(--neon-cyan)', fontSize: '1.2rem' }}>{finalReport.baseScores.vigor}%</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>PROFILE VIGOR</div>
+                  <div style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem' }}>{finalReport.baseScores.vigor}%</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>DOMAIN DEPTH</div>
-                  <div style={{ color: '#fff', fontSize: '1.2rem' }}>{finalReport.baseScores.depth}%</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>DOMAIN DEPTH</div>
+                  <div style={{ color: '#fff', fontSize: '1.6rem' }}>{finalReport.baseScores.depth}%</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>KNOWLEDGE WIDTH</div>
-                  <div style={{ color: '#fff', fontSize: '1.2rem' }}>{finalReport.baseScores.width}%</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>KNOWLEDGE WIDTH</div>
+                  <div style={{ color: '#fff', fontSize: '1.6rem' }}>{finalReport.baseScores.width}%</div>
                 </div>
               </div>
             </section>
 
             {/* Oracle Insights */}
-            <section className="panel" style={{ padding: '2.5rem' }}>
-              <h3 className="cyber-font glow-yellow" style={{ color: 'var(--neon-yellow)', fontSize: '1.3rem', marginBottom: '1.5rem' }}>
+            <section className="panel" style={{ padding: '3rem' }}>
+              <h3 className="cyber-font glow-yellow" style={{ color: 'var(--neon-yellow)', fontSize: '1.6rem', marginBottom: '2rem' }}>
                 ORACLE_INSIGHTS (AI_VULNERABILITY)
               </h3>
               <div className="markdown-body">

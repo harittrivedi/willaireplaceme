@@ -100,14 +100,14 @@ export async function POST(req: NextRequest) {
         const vigorScore: number = extractorResult.vigor_score || 50;
 
         // Agent 2: The Oracle (Domain Research)
-        const oracleSys = `You are a hyper-analytical AI Capability Oracle. Research current state-of-the-art AI against the user's specific sub-domain. You must be brutal and realistic: identify exactly which tasks they perform that are highly vulnerable to current LLMs and Agentic automation. You must provide deep technical insights into what parts of their job will be automated soon. Return strict JSON: {"research_insights": "harsh, rigorous analysis of AI's threat to their specific job functions", "immunity_score": number(1-100)}`;
+        const oracleSys = `You are a hyper-analytical AI Capability Oracle. Research current state-of-the-art AI against the user's specific sub-domain. You must be highly rigorous and objective: identify exactly which tasks they perform that are highly vulnerable to current LLMs and Agentic automation. You must provide deep technical insights into what parts of their job will be automated soon. Return strict JSON: {"research_insights": "rigorous, objective analysis of AI's threat to their specific job functions", "immunity_score": number(1-100)}`;
         const oracleUser = `User Profile: ${extractorResult.structured_profile}`;
         const oracleRes = await runAgent(oracleSys, oracleUser, 0);
         const oracleResult = JSON.parse(oracleRes || '{}');
         const immunityScore: number = oracleResult.immunity_score || 50;
 
         // Agent 3: The Judge
-        const judgeSys = `You are the Architect Level Judge, evaluating the user with extreme technical rigor. Score them strictly against standard 1-100 metrics. Penalize heavily for generic or easily automated skills. Reward deep, complex architectural experience and cross-disciplinary mastery. Return strict JSON: {"domain_depth": number, "knowledge_width": number, "domain_variance": number, "experience_context": number}`;
+        const judgeSys = `You are the Architect Level Judge, evaluating the user with extreme technical rigor. Score them strictly against standard 1-100 metrics. Grade stringently for generic or easily automated skills. Reward deep, complex architectural experience and cross-disciplinary mastery. Return strict JSON: {"domain_depth": number, "knowledge_width": number, "domain_variance": number, "experience_context": number}`;
         const judgeUser = `Profile: ${extractorResult.structured_profile}\nAI Research: ${oracleResult.research_insights}`;
         const judgeRes = await runAgent(judgeSys, judgeUser, 0);
         const judgeResult = JSON.parse(judgeRes || '{}');
