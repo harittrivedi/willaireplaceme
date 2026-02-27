@@ -1,12 +1,13 @@
 # Will AI Replace Me? - System Diagnostic
 
-This application performs a rigorous, multi-agent AI vulnerability diagnostic on your career trajectory. By analyzing your Resume (PDF) or LinkedIn Profile, the AI agents determine your **Architect Convergence Score** and identify the precise gaps in your skill tree that must be filled to achieve indispensable architectural depth.
+This application performs a rigorous, multi-agent AI vulnerability diagnostic on your career trajectory. By analyzing your Resume (PDF) or LinkedIn Profile, the AI agents determine your **AI Replacement Probability Score** (on a scale of 0-10, where 10 means Highly Vulnerable) and identify precise gaps in your skill tree.
 
 ## Features
 - **Multi-Agent Orchestration**: Specialized AI Agents (Extractor, Oracle, Judge, Mentor) work sequentially to provide brutal, realistic feedback.
-- **Cyber-Retro UI**: A stunning glowing neon aesthetic with CRT scanline animations and dynamic terminal logs.
+- **Cyber-Retro UX**: A stunning neon aesthetic with CRT scanline animations and dynamic terminal logs, fully responsive for flawless display on mobile devices.
+- **Readable Outputs**: Complete `react-markdown` integration and strict LLM prompting ensure detailed reports are layman-friendly and highly legible.
 - **Deterministic Caching**: Saves API bandwidth by safely hashing and caching payloads locally.
-- **Client/Server Boundary**: API keys are strictly protected on the Next.js backend, never exposed to the client.
+- **Vercel Native**: Employs `cheerio` for ESM-compliant Next.js Serverless processing.
 
 ---
 
