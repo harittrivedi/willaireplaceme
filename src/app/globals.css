@@ -200,6 +200,56 @@ h6,
   }
 }
 
+/* Tooltip styles */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  margin-left: 0.5rem;
+}
+
+.info-bubble {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  color: #000;
+  font-weight: bold;
+  font-size: 0.8rem;
+  font-family: var(--font-inter), sans-serif;
+  box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 280px;
+  background-color: rgba(10, 10, 15, 0.95);
+  color: var(--text-primary);
+  text-align: left;
+  border: 1px solid var(--neon-cyan);
+  border-radius: 4px;
+  padding: 1rem;
+  position: absolute;
+  z-index: 100;
+  bottom: 150%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  box-shadow: 0 0 15px rgba(32, 255, 238, 0.2);
+  pointer-events: none;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
 /* Markdown Beautiful Typography */
 .markdown-body {
   line-height: 1.8;

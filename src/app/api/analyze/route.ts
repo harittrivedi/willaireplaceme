@@ -120,15 +120,16 @@ export async function POST(req: NextRequest) {
 
         // Final Math: Sum all 6 base scores (max 600)
         const totalScore = vigorScore + immunityScore + domainDepth + knowledgeWidth + domainVariance + expContext;
-        const base10Score = totalScore / 60;
-        const roundedFinalScore = Math.round(base10Score * 2) / 2;
+        // Invert the score: high attributes (600/600) = 0/10 risk. Low attributes (0/600) = 10/10 risk.
+        const base10Score = 10 - (totalScore / 60);
+        const roundedFinalScore = Math.max(0, Math.min(10, Math.round(base10Score * 2) / 2));
 
         // Agent 4: The Mentor
         const mentorSys = `You are a futuristic, elite Cyber-Mentor. Based on the rigorous AI vulnerability analysis, provide a concrete, step-by-step roadmap to achieve 'System Architect' depth in their exact domain. 
 Keep the roadmap EXTREMELY concise, punchy, and fast to read. It should be rapid-fire, high-impact advice.
 You MUST provide 3 elaborately detailed, yet concisely worded 'Level-Up Quests'. These quests shouldn't just be 'learn python' - they must involve mastering specific modern architectures, advanced integrations, or deep foundational methodologies that AI cannot easily replicate (e.g. distributed systems consensus, hardware/software codesign).
 Return JSON: {"cyber_roadmap": ["short crisp paragraph 1", "short crisp paragraph 2"], "level_up_quests": ["concise, complex task 1", "concise, complex task 2", "concise, complex task 3"]}`;
-        const mentorUser = `The user achieved a total Architect Convergence Score of ${roundedFinalScore}/10. Their AI Immunity is ${immunityScore}/100. Profile context: ${extractorResult.structured_profile}. Draft their cyber-roadmap and give them 3 actionable "level-up quests".`;
+        const mentorUser = `The user achieved an AI Replacement Probability Score of ${roundedFinalScore}/10 (where 10 is critically vulnerable to automation, and 0 is completely indispensable). Their AI Immunity is ${immunityScore}/100. Profile context: ${extractorResult.structured_profile}. Draft their concise cyber-roadmap and 3 actionable "level-up quests".`;
         const mentorRes = await runAgent(mentorSys, mentorUser, 0.2);
         const mentorResult = JSON.parse(mentorRes || '{}');
 

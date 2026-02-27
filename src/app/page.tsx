@@ -170,6 +170,14 @@ export default function Home() {
           <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
             <strong>Our Goal:</strong> To execute a rigorous, multi-agent AI vulnerability diagnostic on your career trajectory.
             Upload your Resume or LinkedIn Profile to identify exactly which areas of your skill tree must be targeted to achieve indispensable <em>architectural depth</em> in your domain.
+            <br /><br />
+            <span style={{ color: 'var(--neon-yellow)' }}>[NOTE]:</span> The resulting <strong>AI Replacement Probability Score</strong> runs from <strong>0 to 10</strong>. A 10 means your roles are highly susceptible to automation.
+            <span className="tooltip-container">
+              <span className="info-bubble">i</span>
+              <span className="tooltip-text cyber-font" style={{ textTransform: 'none', letterSpacing: 'normal' }}>
+                <strong>Scoring Breakdown:</strong> The 0-10 vulnerability score analyzes 6 factors: AI Immunity (LLM capabilities vs your niche), Profile Vigor, Domain Depth, Knowledge Width, Variance, and Context. Higher attributes yield a lower risk score. 0 = Indispensable. 10 = Highly Vulnerable.
+              </span>
+            </span>
           </p>
         </header>
       )}
@@ -308,8 +316,14 @@ export default function Home() {
 
             {/* Score Card */}
             <section className="panel" style={{ textAlign: 'center', borderColor: 'var(--neon-magenta)' }}>
-              <h3 className="cyber-font" style={{ color: 'var(--neon-magenta)', fontSize: '1.2rem', marginBottom: '1rem' }}>
-                ARCHITECT_CONVERGENCE_SCORE
+              <h3 className="cyber-font" style={{ color: 'var(--neon-magenta)', fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                AI_REPLACEMENT_PROBABILITY
+                <span className="tooltip-container" style={{ marginLeft: '1rem' }}>
+                  <span className="info-bubble" style={{ background: 'var(--neon-magenta)', boxShadow: '0 0 5px var(--neon-magenta)', color: '#fff' }}>i</span>
+                  <span className="tooltip-text cyber-font" style={{ textTransform: 'none', letterSpacing: 'normal', color: 'var(--text-muted)', fontSize: '0.8rem', width: '250px' }}>
+                    <strong>Scoring Breakdown:</strong> Analyzes 6 attributes (Vigor, Immunity, Depth, Width, Variance, Context). Strong attributes = lower risk. 0 = Indispensable. 10 = High Risk.
+                  </span>
+                </span>
               </h3>
               <div className="glow-cyan" style={{ fontSize: '6rem', fontWeight: 'bold', lineHeight: 1 }}>
                 {finalReport.finalScore}
