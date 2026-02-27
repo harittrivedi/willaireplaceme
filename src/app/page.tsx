@@ -357,7 +357,7 @@ export default function Home() {
               </h3>
               <div className="markdown-body">
                 <ReactMarkdown>
-                  {finalReport.insights}
+                  {typeof finalReport.insights === 'string' ? finalReport.insights : JSON.stringify(finalReport.insights, null, 2)}
                 </ReactMarkdown>
               </div>
             </section>
@@ -371,7 +371,9 @@ export default function Home() {
               </h3>
               <div className="markdown-body">
                 <ReactMarkdown>
-                  {Array.isArray(finalReport.roadmap) ? finalReport.roadmap.join('\n\n') : finalReport.roadmap}
+                  {Array.isArray(finalReport.roadmap)
+                    ? finalReport.roadmap.map((r: any) => typeof r === 'string' ? r : JSON.stringify(r)).join('\n\n')
+                    : (typeof finalReport.roadmap === 'string' ? finalReport.roadmap : JSON.stringify(finalReport.roadmap, null, 2))}
                 </ReactMarkdown>
               </div>
             </section>
@@ -382,23 +384,26 @@ export default function Home() {
                 &gt;_ LEVEL_UP_QUESTS
               </h3>
               <ul style={{ listStyleType: 'none', padding: 0 }}>
-                {finalReport.quests.map((quest: string, idx: number) => (
-                  <li key={idx} className="quest-item" style={{
-                    background: 'rgba(252, 238, 10, 0.05)',
-                    marginBottom: '1.5rem',
-                    borderLeft: '4px solid var(--neon-yellow)',
-                    borderRadius: '4px'
-                  }}>
-                    <div style={{ color: 'var(--neon-yellow)', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span className="cyber-font">[QUEST_{idx + 1}]</span>
-                    </div>
-                    <div className="markdown-body quest-text">
-                      <ReactMarkdown>
-                        {quest}
-                      </ReactMarkdown>
-                    </div>
-                  </li>
-                ))}
+                {Array.isArray(finalReport.quests) && finalReport.quests.map((quest: any, idx: number) => {
+                  const questText = typeof quest === 'string' ? quest : JSON.stringify(quest, null, 2);
+                  return (
+                    <li key={idx} className="quest-item" style={{
+                      background: 'rgba(252, 238, 10, 0.05)',
+                      marginBottom: '1.5rem',
+                      borderLeft: '4px solid var(--neon-yellow)',
+                      borderRadius: '4px'
+                    }}>
+                      <div style={{ color: 'var(--neon-yellow)', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="cyber-font">[QUEST_{idx + 1}]</span>
+                      </div>
+                      <div className="markdown-body quest-text">
+                        <ReactMarkdown>
+                          {questText}
+                        </ReactMarkdown>
+                      </div>
+                    </li>
+                  )
+                })}
               </ul>
             </section>
           </div>
