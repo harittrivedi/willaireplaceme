@@ -164,10 +164,10 @@ export default function Home() {
 
       {step !== 'RESULT' && (
         <header style={{ textAlign: 'center', marginBottom: '4rem', marginTop: '2rem' }}>
-          <h1 className="glow-cyan" style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+          <h1 className="glow-cyan main-title">
             WILL <span className="glow-magenta" style={{ color: 'var(--neon-magenta)' }}>AI</span> REPLACE ME?
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
+          <p className="intro-text" style={{ color: 'var(--text-muted)', maxWidth: '800px', margin: '0 auto', lineHeight: '1.8' }}>
             <strong>Our Goal:</strong> To execute a rigorous, multi-agent AI vulnerability diagnostic on your career trajectory.
             Upload your Resume or LinkedIn Profile to identify exactly which areas of your skill tree must be targeted to achieve indispensable <em>architectural depth</em> in your domain.
             <br /><br />
@@ -303,8 +303,8 @@ export default function Home() {
 
       {step === 'RESULT' && finalReport && (
         <div className="fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-            <h1 className="glow-cyan" style={{ fontSize: '2.5rem', margin: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h1 className="glow-cyan section-title">
               ANALYSIS_COMPLETE
             </h1>
             <button className="btn-cyber hide-on-print" onClick={downloadPDF} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
@@ -312,7 +312,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <div className="mobile-gap">
 
             {/* Score Card */}
             <section className="panel" style={{ textAlign: 'center', borderColor: 'var(--neon-magenta)' }}>
@@ -325,9 +325,9 @@ export default function Home() {
                   </span>
                 </span>
               </h3>
-              <div className="glow-cyan" style={{ fontSize: '6rem', fontWeight: 'bold', lineHeight: 1 }}>
+              <div className="glow-cyan score-display">
                 {finalReport.finalScore}
-                <span style={{ fontSize: '2rem', color: 'var(--text-muted)' }}>/10</span>
+                <span>/10</span>
               </div>
 
               <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
@@ -351,8 +351,8 @@ export default function Home() {
             </section>
 
             {/* Oracle Insights */}
-            <section className="panel" style={{ padding: '3rem' }}>
-              <h3 className="cyber-font glow-yellow" style={{ color: 'var(--neon-yellow)', fontSize: '1.6rem', marginBottom: '2rem' }}>
+            <section className="panel padded-panel">
+              <h3 className="cyber-font glow-yellow panel-title" style={{ color: 'var(--neon-yellow)' }}>
                 ORACLE_INSIGHTS (AI_VULNERABILITY)
               </h3>
               <div className="markdown-body">
@@ -363,10 +363,10 @@ export default function Home() {
             </section>
           </div>
 
-          <div style={{ marginTop: '3rem' }}>
+          <div className="mobile-margin">
             {/* Mentor Roadmap */}
-            <section className="panel" style={{ marginBottom: '3rem', padding: '3rem' }}>
-              <h3 className="cyber-font glow-cyan" style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', marginBottom: '2rem' }}>
+            <section className="panel padded-panel" style={{ marginBottom: '3rem' }}>
+              <h3 className="cyber-font glow-cyan panel-title" style={{ color: 'var(--neon-cyan)' }}>
                 &gt;_ THE_CYBER_ROADMAP
               </h3>
               <div className="markdown-body">
@@ -377,15 +377,14 @@ export default function Home() {
             </section>
 
             {/* Level Up Quests */}
-            <section className="panel" style={{ borderColor: 'var(--neon-yellow)', padding: '3rem' }}>
-              <h3 className="cyber-font" style={{ color: 'var(--neon-yellow)', fontSize: '1.6rem', marginBottom: '2rem' }}>
+            <section className="panel padded-panel" style={{ borderColor: 'var(--neon-yellow)' }}>
+              <h3 className="cyber-font panel-title" style={{ color: 'var(--neon-yellow)' }}>
                 &gt;_ LEVEL_UP_QUESTS
               </h3>
               <ul style={{ listStyleType: 'none', padding: 0 }}>
                 {finalReport.quests.map((quest: string, idx: number) => (
-                  <li key={idx} style={{
+                  <li key={idx} className="quest-item" style={{
                     background: 'rgba(252, 238, 10, 0.05)',
-                    padding: '2rem',
                     marginBottom: '1.5rem',
                     borderLeft: '4px solid var(--neon-yellow)',
                     borderRadius: '4px'
