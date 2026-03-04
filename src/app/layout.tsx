@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Share_Tech_Mono, Inter } from 'next/font/google';
+import { Analytics } from "@vercel/analytics/react";
 import './globals.css';
 
 const techMono = Share_Tech_Mono({ weight: '400', subsets: ['latin'], variable: '--font-tech' });
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${techMono.variable} ${inter.variable}`}>
         {children}
+        <Analytics />
       </body>
     </html>
   );
