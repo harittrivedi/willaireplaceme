@@ -7,11 +7,13 @@ export const maxDuration = 60; // Allow 60 seconds on Vercel for sequential mult
 
 export async function POST(req: NextRequest) {
     try {
-        let { profileText, model } = await req.json();
+        let { profileText, model, role } = await req.json();
 
         if (!profileText) {
             return NextResponse.json({ error: 'No profile text provided.' }, { status: 400 });
         }
+
+        const roleContext = role ? `The user's current professional role is: ${role}.` : '';
 
         // --- LINKEDIN SCRAPER INJECTION ---
         if (profileText.includes('LinkedIn Profile Link:')) {
@@ -91,21 +93,21 @@ export async function POST(req: NextRequest) {
         };
 
         // Agent 1: The Extractor
-        const extSys = `You are a strict, highly analytical HR Extractor. Analyze the raw text of the user's resume/profile, highlighting specific tool stacks, complex system architectures, and systemic impact. Do NOT sugarcoat generic experience. Return strict JSON formatting: {"structured_profile": "detailed comprehensive summary", "vigor_score": number(1-100)}`;
+        const extSys = `You are a strict, highly analytical HR Extractor. ${roleContext} Analyze the raw text of the user's resume/profile specifically through the lens of their role. Highlight specific tool stacks, complex system architectures, and systemic impact relevant to this role. Do NOT sugarcoat generic experience. Return strict JSON formatting: {"structured_profile": "detailed comprehensive summary", "vigor_score": number(1-100)}`;
         const extUser = `Analyze this profile carefully: ${profileText}`;
         const extRes = await runAgent(extSys, extUser, 0);
         const extractorResult = JSON.parse(extRes || '{}');
         const vigorScore: number = extractorResult.vigor_score || 50;
 
         // Agent 2: The Oracle (Domain Research)
-        const oracleSys = `You are an AI Capability Analyst. Research current state-of-the-art AI against the user's specific sub-domain. You must be objective and use clear, layman-friendly language with minimal technical jargon. Explain concepts simply but keep the insights valuable and high-impact. Keep your insights EXTREMELY concise and fast to read (under 2 minutes). Use punchy bullet points. Identify exactly which tasks they perform that are vulnerable to current AI automation. Return strict JSON: {"research_insights": "concise, bulleted, jargon-free analysis of AI's threat", "immunity_score": number(1-100)}`;
+        const oracleSys = `You are an AI Capability Analyst. ${roleContext} Research current state-of-the-art AI specifically against a professional working as this role in their sub-domain. You must be objective and use clear, layman-friendly language with minimal technical jargon. Explain concepts simply but keep the insights valuable and high-impact. Keep your insights EXTREMELY concise and fast to read (under 2 minutes). Use punchy bullet points. Identify exactly which tasks a person in this role performs that are vulnerable to current AI automation. Return strict JSON: {"research_insights": "concise, bulleted, jargon-free analysis of AI's threat", "immunity_score": number(1-100)}`;
         const oracleUser = `User Profile: ${extractorResult.structured_profile}`;
         const oracleRes = await runAgent(oracleSys, oracleUser, 0);
         const oracleResult = JSON.parse(oracleRes || '{}');
         const immunityScore: number = oracleResult.immunity_score || 50;
 
         // Agent 3: The Judge
-        const judgeSys = `You are the Architect Level Judge, evaluating the user with extreme technical rigor. Score them strictly against standard 1-100 metrics. Grade stringently for generic or easily automated skills. Reward deep, complex architectural experience and cross-disciplinary mastery. Return strict JSON: {"domain_depth": number, "knowledge_width": number, "domain_variance": number, "experience_context": number}`;
+        const judgeSys = `You are the Architect Level Judge, evaluating the user with extreme technical rigor. ${roleContext} Score them strictly against standard 1-100 metrics for their specific role. Grade stringently for generic or easily automated skills within this role. Reward deep, complex architectural experience and cross-disciplinary mastery relevant to this role. Return strict JSON: {"domain_depth": number, "knowledge_width": number, "domain_variance": number, "experience_context": number}`;
         const judgeUser = `Profile: ${extractorResult.structured_profile}\nAI Research: ${oracleResult.research_insights}`;
         const judgeRes = await runAgent(judgeSys, judgeUser, 0);
         const judgeResult = JSON.parse(judgeRes || '{}');
@@ -123,17 +125,18 @@ export async function POST(req: NextRequest) {
         const roundedFinalScore = Math.max(0, Math.min(10, Math.round(base10Score * 2) / 2));
 
         // Agent 4: The Mentor
-        const mentorSys = `You are an expert Career Mentor. Based on the AI vulnerability analysis, provide a concrete, step-by-step roadmap to achieve 'System Architect' depth in their domain. 
-Use clear, layman-friendly language with minimal jargon so it is easy to understand. Keep the roadmap EXTREMELY concise, punchy, and fast to read. It should be rapid-fire, high-value practical advice.
-You MUST provide 3 actionable, specific 'Level-Up Quests'. These quests should involve mastering specific skills or methodologies that AI cannot easily replicate, but explain them simply without overly technical jargon.
+        const mentorSys = `You are an expert Career Mentor. ${roleContext} Based on the AI vulnerability analysis, provide a concrete, step-by-step roadmap for someone in this specific role to achieve 'System Architect' depth in their domain. 
+Use clear, layman-friendly language with minimal jargon so it is easy to understand. Keep the roadmap EXTREMELY concise, punchy, and fast to read. It should be rapid-fire, high-value practical advice tailored to this role.
+You MUST provide 3 actionable, specific 'Level-Up Quests'. These quests should involve mastering specific skills or methodologies that AI cannot easily replicate for this role, but explain them simply without overly technical jargon.
 Return JSON: {"cyber_roadmap": ["short crisp jargon-free paragraph 1", "short crisp jargon-free paragraph 2"], "level_up_quests": ["clear actionable task 1", "clear actionable task 2", "clear actionable task 3"]}`;
-        const mentorUser = `The user achieved an AI Replacement Probability Score of ${roundedFinalScore}/10 (where 10 is critically vulnerable to automation, and 0 is completely indispensable). Their AI Immunity is ${immunityScore}/100. Profile context: ${extractorResult.structured_profile}. Draft their concise cyber-roadmap and 3 actionable "level-up quests".`;
+        const mentorUser = `The user (role: ${role || 'unspecified'}) achieved an AI Replacement Probability Score of ${roundedFinalScore}/10 (where 10 is critically vulnerable to automation, and 0 is completely indispensable). Their AI Immunity is ${immunityScore}/100. Profile context: ${extractorResult.structured_profile}. Draft their concise cyber-roadmap and 3 actionable "level-up quests".`;
         const mentorRes = await runAgent(mentorSys, mentorUser, 0.2);
         const mentorResult = JSON.parse(mentorRes || '{}');
 
         // Compile Final Payload
         const finalReport = {
             finalScore: roundedFinalScore,
+            role: role || null,
             baseScores: {
                 vigor: vigorScore,
                 immunity: immunityScore,

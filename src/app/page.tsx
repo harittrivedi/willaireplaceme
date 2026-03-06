@@ -1,17 +1,37 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type DiagnosticStep = 'INPUT' | 'PARSING' | 'ANALYZING' | 'RESULT';
+
+const ROLES = [
+  'Software Engineer',
+  'Frontend Developer',
+  'Backend Developer',
+  'Data Scientist',
+  'Data Analyst',
+  'DevOps / SRE',
+  'Product Manager',
+  'UX Designer',
+  'QA / Test Engineer',
+  'Systems Architect',
+  'Cybersecurity Analyst',
+  'Other',
+];
 
 export default function Home() {
   const [step, setStep] = useState<DiagnosticStep>('INPUT');
   const [file, setFile] = useState<File | null>(null);
   const [linkUrl, setLinkUrl] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [customRole, setCustomRole] = useState<string>('');
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [finalReport, setFinalReport] = useState<any>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -21,12 +41,207 @@ export default function Home() {
 
   const addLog = (msg: string) => setTerminalLogs((prev) => [...prev, msg]);
 
+  const resolvedRole = selectedRole === 'Other' ? customRole : selectedRole;
+
   // Frontend SHA-256 Hashing for Deterministic Caching
   const hashText = async (message: string) => {
     const msgUint8 = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  // ─── Score Card Canvas Generator ─────────────────────────────
+  const generateScoreCard = useCallback(() => {
+    if (!finalReport || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d')!;
+    const W = 1200;
+    const H = 630;
+    canvas.width = W;
+    canvas.height = H;
+
+    // Background
+    ctx.fillStyle = '#050510';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle grid
+    ctx.strokeStyle = 'rgba(32, 255, 238, 0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // Top accent line
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.5, '#20ffee');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 3);
+
+    // Title
+    ctx.font = 'bold 36px monospace';
+    ctx.fillStyle = '#20ffee';
+    ctx.shadowColor = '#20ffee';
+    ctx.shadowBlur = 15;
+    ctx.textAlign = 'center';
+    ctx.fillText('WILL AI REPLACE ME?', W / 2, 60);
+    ctx.shadowBlur = 0;
+
+    // Subtitle / Role
+    const roleLabel = finalReport.role || resolvedRole;
+    if (roleLabel) {
+      ctx.font = '18px monospace';
+      ctx.fillStyle = '#ff00ff';
+      ctx.shadowColor = '#ff00ff';
+      ctx.shadowBlur = 8;
+      ctx.fillText(`ROLE: ${roleLabel.toUpperCase()}`, W / 2, 95);
+      ctx.shadowBlur = 0;
+    }
+
+    // Score
+    const scoreY = 240;
+    ctx.font = 'bold 140px monospace';
+    ctx.fillStyle = '#20ffee';
+    ctx.shadowColor = '#20ffee';
+    ctx.shadowBlur = 30;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${finalReport.finalScore}`, W / 2 - 30, scoreY);
+    ctx.shadowBlur = 0;
+
+    ctx.font = 'bold 40px monospace';
+    ctx.fillStyle = '#888888';
+    ctx.fillText('/10', W / 2 + 80, scoreY);
+
+    // Score label
+    ctx.font = '16px monospace';
+    ctx.fillStyle = '#ff00ff';
+    ctx.fillText('AI REPLACEMENT PROBABILITY', W / 2, scoreY + 40);
+
+    // Stats bars
+    const stats = [
+      { label: 'AI IMMUNITY', value: finalReport.baseScores.immunity, color: '#fcee0a' },
+      { label: 'PROFILE VIGOR', value: finalReport.baseScores.vigor, color: '#20ffee' },
+      { label: 'DOMAIN DEPTH', value: finalReport.baseScores.depth, color: '#ffffff' },
+      { label: 'KNOWLEDGE WIDTH', value: finalReport.baseScores.width, color: '#ffffff' },
+    ];
+
+    const barStartX = 160;
+    const barWidth = 400;
+    const barHeight = 20;
+    let barY = 340;
+
+    stats.forEach((stat) => {
+      // Label
+      ctx.font = '14px monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textAlign = 'right';
+      ctx.fillText(stat.label, barStartX - 15, barY + 15);
+
+      // Background bar
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(barStartX, barY, barWidth, barHeight);
+
+      // Fill bar
+      const fillW = (stat.value / 100) * barWidth;
+      ctx.fillStyle = stat.color;
+      ctx.shadowColor = stat.color;
+      ctx.shadowBlur = 6;
+      ctx.fillRect(barStartX, barY, fillW, barHeight);
+      ctx.shadowBlur = 0;
+
+      // Value
+      ctx.font = 'bold 16px monospace';
+      ctx.fillStyle = stat.color;
+      ctx.textAlign = 'left';
+      ctx.fillText(`${stat.value}%`, barStartX + barWidth + 15, barY + 16);
+
+      barY += 50;
+    });
+
+    // Verdict box (right side)
+    const verdictX = 700;
+    const verdictY = 340;
+    ctx.strokeStyle = 'rgba(32, 255, 238, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(verdictX, verdictY, 380, 180);
+
+    ctx.font = '14px monospace';
+    ctx.fillStyle = '#20ffee';
+    ctx.textAlign = 'left';
+    ctx.fillText('VERDICT', verdictX + 15, verdictY + 30);
+
+    const score = finalReport.finalScore;
+    let verdict = '';
+    let verdictColor = '';
+    if (score <= 2) { verdict = 'INDISPENSABLE'; verdictColor = '#20ffee'; }
+    else if (score <= 4) { verdict = 'LOW RISK'; verdictColor = '#20ffee'; }
+    else if (score <= 6) { verdict = 'MODERATE RISK'; verdictColor = '#fcee0a'; }
+    else if (score <= 8) { verdict = 'HIGH RISK'; verdictColor = '#ff6600'; }
+    else { verdict = 'CRITICALLY VULNERABLE'; verdictColor = '#ff0040'; }
+
+    ctx.font = 'bold 28px monospace';
+    ctx.fillStyle = verdictColor;
+    ctx.shadowColor = verdictColor;
+    ctx.shadowBlur = 10;
+    ctx.fillText(verdict, verdictX + 15, verdictY + 75);
+    ctx.shadowBlur = 0;
+
+    // Variance + Experience in verdict box
+    ctx.font = '13px monospace';
+    ctx.fillStyle = '#888888';
+    ctx.fillText(`VARIANCE: ${finalReport.baseScores.variance}%`, verdictX + 15, verdictY + 120);
+    ctx.fillText(`EXPERIENCE: ${finalReport.baseScores.experience}%`, verdictX + 15, verdictY + 145);
+
+    // Bottom accent
+    const gradBot = ctx.createLinearGradient(0, 0, W, 0);
+    gradBot.addColorStop(0, 'transparent');
+    gradBot.addColorStop(0.5, '#ff00ff');
+    gradBot.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradBot;
+    ctx.fillRect(0, H - 50, W, 2);
+
+    // Footer
+    ctx.font = '14px monospace';
+    ctx.fillStyle = '#555555';
+    ctx.textAlign = 'center';
+    ctx.fillText('willaireplaceme-wine.vercel.app  •  Multi-Agent AI Career Diagnostic', W / 2, H - 20);
+  }, [finalReport, resolvedRole]);
+
+  useEffect(() => {
+    if (showShareModal && finalReport) {
+      // Small delay to ensure canvas is mounted
+      setTimeout(() => generateScoreCard(), 50);
+    }
+  }, [showShareModal, finalReport, generateScoreCard]);
+
+  const downloadScoreCard = () => {
+    if (!canvasRef.current) return;
+    const link = document.createElement('a');
+    link.download = 'ai-replacement-scorecard.png';
+    link.href = canvasRef.current.toDataURL('image/png');
+    link.click();
+  };
+
+  const copyScoreCard = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const blob = await new Promise<Blob>((resolve) =>
+        canvasRef.current!.toBlob((b) => resolve(b!), 'image/png')
+      );
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      setCopiedToast(true);
+      setTimeout(() => setCopiedToast(false), 2000);
+    } catch {
+      alert('Copy failed. Try downloading instead.');
+    }
   };
 
   const handleInitiate = async () => {
@@ -41,6 +256,9 @@ export default function Home() {
 
     setStep('PARSING');
     addLog('> INITIATING DATA EXTRACTION...');
+    if (resolvedRole) {
+      addLog(`> ROLE LOCK: ${resolvedRole.toUpperCase()}`);
+    }
 
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
@@ -70,10 +288,9 @@ export default function Home() {
         addLog(`[OK] URL REGISTERED.`);
       }
 
-      // 2. Check Cache
+      // 2. Check Cache (role is factored into the hash)
       addLog('> GENERATING DETERMINISTIC HASH...');
-      // By default the backend is locked to Gemini 2.5 Flash as requested.
-      const cacheHash = await hashText(rawText + "gemini-2.5-flash");
+      const cacheHash = await hashText(rawText + "gemini-2.5-flash" + (resolvedRole || ''));
       const cached = localStorage.getItem(`diagnosis_${cacheHash}`);
 
       setStep('ANALYZING');
@@ -82,7 +299,6 @@ export default function Home() {
         addLog(`[WARN] EXACT MATCH DETECTED IN LOCAL CHRONICLES (HASH: ${cacheHash.substring(0, 8)}).`);
         addLog('> BYPASSING LLM MATRIX... RESTORING PREVIOUS STATE.');
 
-        // Mock a slight wait just for UX
         setTimeout(() => {
           setFinalReport(JSON.parse(cached));
           setStep('RESULT');
@@ -103,7 +319,6 @@ export default function Home() {
         "AGENT_4 [MENTOR]: Computing Level-up Quests..."
       ];
 
-      // We don't await the interval, we just let it push logs slowly while we eagerly await the API
       let logIdx = 0;
       const interval = setInterval(() => {
         if (logIdx < mockLogs.length) {
@@ -112,11 +327,11 @@ export default function Home() {
         }
       }, 3500);
 
-      // 4. API Call
+      // 4. API Call (now includes role)
       const analyzeRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileText: rawText, model: 'gemini-2.5-flash' }),
+        body: JSON.stringify({ profileText: rawText, model: 'gemini-2.5-flash', role: resolvedRole || undefined }),
         signal
       });
       const analyzeData = await analyzeRes.json();
@@ -127,7 +342,6 @@ export default function Home() {
 
       addLog('[SUCCESS] ANALYSIS COMPLETE. SCALING SCORES...');
 
-      // Save to cache
       localStorage.setItem(`diagnosis_${cacheHash}`, JSON.stringify(analyzeData));
 
       setFinalReport(analyzeData);
@@ -184,6 +398,35 @@ export default function Home() {
 
       {step === 'INPUT' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+
+          {/* Role Selector */}
+          <section className="panel role-selector-section" style={{ textAlign: 'center' }}>
+            <h2 className="cyber-font glow-magenta" style={{ marginBottom: '1.5rem', fontSize: '1.3rem', color: 'var(--neon-magenta)' }}>
+              &gt;_ SELECT_YOUR_ROLE
+            </h2>
+            <div className="role-selector-grid">
+              {ROLES.map((role) => (
+                <button
+                  key={role}
+                  className={`role-chip ${selectedRole === role ? 'active' : ''}`}
+                  onClick={() => setSelectedRole(selectedRole === role ? '' : role)}
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
+            {selectedRole === 'Other' && (
+              <input
+                type="text"
+                className="role-other-input"
+                placeholder="Type your role..."
+                value={customRole}
+                onChange={(e) => setCustomRole(e.target.value)}
+              />
+            )}
+          </section>
+
+          {/* Data Source Input */}
           <section className="panel" style={{ textAlign: 'center' }}>
             <h2 className="cyber-font glow-cyan" style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>
               &gt;_ INPUT_DATA_SOURCE
@@ -304,12 +547,24 @@ export default function Home() {
       {step === 'RESULT' && finalReport && (
         <div className="fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h1 className="glow-cyan section-title">
-              ANALYSIS_COMPLETE
-            </h1>
-            <button className="btn-cyber hide-on-print" onClick={downloadPDF} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-              EXPORT_PDF()
-            </button>
+            <div>
+              <h1 className="glow-cyan section-title">
+                ANALYSIS_COMPLETE
+              </h1>
+              {(finalReport.role || resolvedRole) && (
+                <div className="cyber-font" style={{ color: 'var(--neon-magenta)', fontSize: '0.9rem', marginTop: '0.5rem', letterSpacing: '2px' }}>
+                  // {(finalReport.role || resolvedRole).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="hide-on-print" style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+              <button className="btn-cyber" onClick={() => setShowShareModal(true)} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)' }}>
+                SHARE_SCORECARD()
+              </button>
+              <button className="btn-cyber" onClick={downloadPDF} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                EXPORT_PDF()
+              </button>
+            </div>
           </div>
 
           <div className="mobile-gap">
@@ -409,11 +664,37 @@ export default function Home() {
           </div>
 
           <div className="hide-on-print" style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '2rem' }}>
-            <button className="btn-cyber" onClick={() => { setStep('INPUT'); setFile(null); setLinkUrl(''); setTerminalLogs([]); }}>
+            <button className="btn-cyber" onClick={() => { setStep('INPUT'); setFile(null); setLinkUrl(''); setTerminalLogs([]); setSelectedRole(''); setCustomRole(''); }}>
               REBOOT_SYSTEM()
             </button>
           </div>
 
+        </div>
+      )}
+
+      {/* Share Score Card Modal */}
+      {showShareModal && (
+        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="share-modal-close" onClick={() => setShowShareModal(false)}>✕</button>
+            <h3 className="cyber-font glow-cyan" style={{ fontSize: '1.1rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+              SHARE_SCORECARD
+            </h3>
+            <div className="share-preview">
+              <canvas ref={canvasRef} style={{ width: '100%' }} />
+            </div>
+            <div className="share-actions">
+              <button className="btn-cyber" onClick={downloadScoreCard}>
+                📥 DOWNLOAD_PNG
+              </button>
+              <button className="btn-cyber" onClick={copyScoreCard} style={{ borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)' }}>
+                📋 COPY_TO_CLIPBOARD
+              </button>
+            </div>
+            {copiedToast && (
+              <div className="share-copied-toast">[OK] IMAGE COPIED TO CLIPBOARD</div>
+            )}
+          </div>
         </div>
       )}
     </main>
